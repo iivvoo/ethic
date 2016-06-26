@@ -162,10 +162,17 @@ class Decompiler:
 
         # fase 2: compensate for "loader", manage labels/jumps
         # this is variable. Probably prepares stack with calling info
-        offset = 18  # pointer after 'return' after CODECOPY
+
+        # Find offset: pointer after first return
+        for opcode in decompiled:
+            if opcode.definition.mnemonic == "RETURN":
+                offset = opcode.pointer + 1
+                break
+
+        print("OFFSET", offset)
 
         # first sweep: collect labels (JUMPDEST)
-        labels = {}
+        labels = {0: "Unknown. Exit perhaps?"}
 
         fase2 = []
         for opcode in decompiled:
@@ -175,12 +182,6 @@ class Decompiler:
                 labels[correction] = "label{0}".format(correction)
                 fase2.append("== {0} ==".format(labels[correction]))  # Hacky
 
-        for opcode in fase2:
-            print(opcode)
-
-        return
-
-        ## Below doesn't work.
         # second sweep: adjust jump's
         fase3 = []
         prevcode = None
@@ -189,18 +190,20 @@ class Decompiler:
             fase3.append(opcode)
             print(opcode)
             # yuck! Mix of opcode and string
-            if hasattr(opcode, 'definition') and \
-                (opcode.definition.mnemonic == "JUMPI" or \
-                opcode.definition.mnemonic == "JUMP"):
-                # need prev!
+            if hasattr(opcode, 'definition') and (
+                    opcode.definition.mnemonic == "JUMPI" or
+                    opcode.definition.mnemonic == "JUMP"):
                 # probably not correct/best way to transform
-                # import pdb; pdb.set_trace()
-                print(prevcode.args)
-                destination = (prevcode.args[0] << 8) + prevcode.args[1]
-                print(destination)
-                fase3.append(" ==> Jump to label {0}".format(labels[destination]))
+                destination = 0
+                for arg in prevcode.args:
+                    destination <<= 8
+                    destination += arg
+                fase3.append(" ==> Jump to label {0}".format(
+                    labels[destination]))
 
-            prevcode = opcode
+            # make sure prevcode isn't some string label
+            if hasattr(opcode, 'definition'):
+                prevcode = opcode
 
         # print result
         for opcode in fase3:
