@@ -1,4 +1,4 @@
-# Etherum Inverse Compiler (ethic)
+# Ethereum Inverse Compiler (ethic)
 
 Ethic is a feeble attempt at building that (somewhat) decompiles ethereum
 code.
