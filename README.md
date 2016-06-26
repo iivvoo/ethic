@@ -23,20 +23,20 @@ where *codefile* contains hex-ascii code, e.g.
 
 while would produce
 
-    0     PUSH1 0x60                        # Place 0 byte item on stack
-    2     PUSH1 0x40                        # Place 0 byte item on stack
+    0     PUSH1 0x60                        # Place 1 byte item on stack
+    2     PUSH1 0x40                        # Place 1 byte item on stack
     4     MSTORE                            # Save word to memory
-    5     PUSH1 0xa                         # Place 0 byte item on stack
-    7     DUP1                              # Duplicate 0st/nd/th stack item
-    8     PUSH1 0x10                        # Place 0 byte item on stack
-    10    PUSH1 0x0                         # Place 0 byte item on stack
+    5     PUSH1 0xa                         # Place 1 byte item on stack
+    7     DUP1                              # Duplicate 1st/nd/th stack item
+    8     PUSH1 0x10                        # Place 1 byte item on stack
+    10    PUSH1 0x0                         # Place 1 byte item on stack
     12    CODECOPY                          # Copy code running in current environment to memory
-    13    PUSH1 0x0                         # Place 0 byte item on stack
+    13    PUSH1 0x0                         # Place 1 byte item on stack
     15    RETURN                            # Halt execution returning output data
-    16    PUSH1 0x60                        # Place 0 byte item on stack
-    18    PUSH1 0x40                        # Place 0 byte item on stack
+    16    PUSH1 0x60                        # Place 1 byte item on stack
+    18    PUSH1 0x40                        # Place 1 byte item on stack
     20    MSTORE                            # Save word to memory
-    21    PUSH1 0x8                         # Place 0 byte item on stack
+    21    PUSH1 0x8                         # Place 1 byte item on stack
     23    JUMP                              # Alter the program counter
     24    JUMPDEST                          # Mark a valid destination for jumps
     25    STOP                              # Halts execution
