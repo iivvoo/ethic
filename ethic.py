@@ -10,7 +10,7 @@ data = minimal1
 binary = binascii.unhexlify(data)
 
 
-class Opcode:
+class OpcodeDef:
 
     def __init__(self, value, mnemonic, adds=0, deletes=0, codeargs=0,
                  i=""):
@@ -31,34 +31,46 @@ class Opcode:
 
     def __call__(self, pointer, program):
         """
-            handle opcode from programcode, returns additional adjustment
+            Create opcode instance from program and definition
         """
-        args = " ".join(hex(program[pointer + i])
-                        for i in range(self.codeargs))
-        out = self.mnemonic
-        if args:
-            out += " " + args
+        return Opcode(self,
+                      pointer,
+                      program[pointer + 1:pointer + 1 + self.codeargs])
 
-        if self.i:
-            out = out.ljust(40, " ") + "# " + self.i
-        print(out)
-        return self.codeargs
+
+class Opcode:
+
+    def __init__(self, definition, pointer, args):
+        self.pointer = pointer
+        self.definition = definition
+        self.args = args
+
+    def __str__(self):
+        out = self.definition.mnemonic
+        if self.args:
+            out += " " + " ".join(hex(a) for a in self.args)
+
+        if self.definition.i:
+            out = out.ljust(40, " ") + "# " + self.definition.i
+        return out
 
 
 class VM:
     opcodes = [
-        Opcode(0x00, "STOP", i="Halts execution"),
-        Opcode(0x39, "CODECOPY", deletes=3,
-               i="Copy code running in current environment to memory"),
-        Opcode(0x52, "MSTORE", deletes=2, i="Save word to memory"),
-        Opcode(0x56, "JUMP", deletes=1, i="Alters program counter"),
-        Opcode(0x5b, "JUMPDEST", i="Mark a valid destination for jumps"),
-        Opcode(0x60, "PUSH1", adds=1, codeargs=1,
-               i="Place 1 byte item on stack"),
-        Opcode(0x80, "DUP1", deletes=1, adds=2, i="Duplicate 1st stack item"),
-        Opcode(0x81, "DUP2", deletes=1, adds=2, i="Duplicate 2nd stack item"),
-        Opcode(0xf3, "RETURN", deletes=2,
-               i="Halt execution returning output data")
+        OpcodeDef(0x00, "STOP", i="Halts execution"),
+        OpcodeDef(0x39, "CODECOPY", deletes=3,
+                  i="Copy code running in current environment to memory"),
+        OpcodeDef(0x52, "MSTORE", deletes=2, i="Save word to memory"),
+        OpcodeDef(0x56, "JUMP", deletes=1, i="Alters program counter"),
+        OpcodeDef(0x5b, "JUMPDEST", i="Mark a valid destination for jumps"),
+        OpcodeDef(0x60, "PUSH1", adds=1, codeargs=1,
+                  i="Place 1 byte item on stack"),
+        OpcodeDef(0x80, "DUP1", deletes=1, adds=2,
+                  i="Duplicate 1st stack item"),
+        OpcodeDef(0x81, "DUP2", deletes=1, adds=2,
+                  i="Duplicate 2nd stack item"),
+        OpcodeDef(0xf3, "RETURN", deletes=2,
+                  i="Halt execution returning output data")
 
 
     ]
@@ -68,42 +80,48 @@ class VM:
 
     def decompile(self, program):
         pointer = 0
+        decompiled = []
+
         while True:
             try:
                 code = program[pointer]
             except IndexError:
                 break
 
-            pointer += 1
             try:
-                pointer += self.map[code](pointer, program)
+                res = self.map[code](pointer, program)
             except KeyError:
-                print("UNKNOWN", hex(code))
+                res = OpcodeDef(code, "UNKNOWN")
+            decompiled.append(res)
+            pointer += (1 + res.definition.codeargs)
+
+        for opcode in decompiled:
+            print(opcode)
 
 VM().decompile(binary)
 
-    # if code == Opcode.STOP:
-    #     print("STOP")
-    # elif code == Opcode.CODECOPY:
-    #     print("CODECOPY")
-    # elif code == Opcode.PUSH1:
-    #     print("PUSH1", hex(binary[pointer]))
-    #     pointer += 1
-    # elif code == Opcode.MSTORE:
-    #     arg1 = binary[pointer]
-    #     arg2 = binary[pointer + 1]
-    #     print("MSTORE", hex(arg1), hex(arg2))
-    #     pointer += 2
-    # elif code == Opcode.JUMP:
-    #     print("JUMP")
-    # elif code == Opcode.JUMPDEST:
-    #     print("JUMPDEST")
-    # elif code == Opcode.DUP1:
-    #     arg1 = binary[pointer]
-    #     arg2 = binary[pointer + 1]
-    #     print("DUP1", hex(arg1), hex(arg2))
-    #     pointer += 2
-    # elif code == Opcode.RETURN:
-    #     print("RETURN")
-    # else:
-    #     print("UNKNOWN", hex(code))
+# if code == Opcode.STOP:
+#     print("STOP")
+# elif code == Opcode.CODECOPY:
+#     print("CODECOPY")
+# elif code == Opcode.PUSH1:
+#     print("PUSH1", hex(binary[pointer]))
+#     pointer += 1
+# elif code == Opcode.MSTORE:
+#     arg1 = binary[pointer]
+#     arg2 = binary[pointer + 1]
+#     print("MSTORE", hex(arg1), hex(arg2))
+#     pointer += 2
+# elif code == Opcode.JUMP:
+#     print("JUMP")
+# elif code == Opcode.JUMPDEST:
+#     print("JUMPDEST")
+# elif code == Opcode.DUP1:
+#     arg1 = binary[pointer]
+#     arg2 = binary[pointer + 1]
+#     print("DUP1", hex(arg1), hex(arg2))
+#     pointer += 2
+# elif code == Opcode.RETURN:
+#     print("RETURN")
+# else:
+#     print("UNKNOWN", hex(code))
