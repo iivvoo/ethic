@@ -50,6 +50,38 @@ class Opcode:
 class Decompiler:
     opcodes = [
         OpDef(0x00, "STOP", i="Halts execution"),
+        OpDef(0x01, "ADD", adds=1, deletes=2, i="Addition operation"),
+        OpDef(0x02, "MUL", adds=1, deletes=2, i="Multiplication operation"),
+        OpDef(0x03, "SUB", adds=1, deletes=2, i="Subtraction operation"),
+        OpDef(0x04, "DIV", adds=1, deletes=2, i="Integer division operation"),
+        OpDef(0x05, "SDIV", adds=1, deletes=2,
+              i="Signed integer division operation (truncated)"),
+        OpDef(0x06, "MOD", adds=1, deletes=2, i="Modulo remainder operation"),
+        OpDef(0x07, "SMOD", adds=1, deletes=2, i="Signed modulo remainder operation"),
+        OpDef(0x08, "ADDMOD", adds=1, deletes=3, i="Modulo addition operation"),
+        OpDef(0x09, "MULMOD", adds=1, deletes=3, i="Modulo multiplication oepration"),
+        OpDef(0x0a, "EXP", adds=1, deletes=2, i="Exponential operation"),
+        OpDef(0x0b, "SIGNEXTEND", adds=1, deletes=2,
+              i="Extended length of two's complement signed integer"),
+
+        OpDef(0x10, "LT", adds=1, deletes=2, i="Less-than comparison"),
+        OpDef(0x11, "GT", adds=1, deletes=2, i="Greater-than comparison"),
+        OpDef(0x12, "SLT", adds=1, deletes=2, i="Signed less-than comparison"),
+        OpDef(0x13, "SGT", adds=1, deletes=2,
+              i="Signed greater-than comparison"),
+        OpDef(0x14, "EQ", adds=1, deletes=2, i="Equality comparison"),
+        OpDef(0x15, "ISZERO", adds=1, deletes=1, i="Simple not operator"),
+        OpDef(0x16, "AND", adds=1, deletes=2, i="Bitwise AND operation"),
+        OpDef(0x17, "OR", adds=1, deletes=2, i="Bitwise OR operation"),
+        OpDef(0x18, "XOR", adds=1, deletes=2, i="Bitwise XOR operation"),
+        OpDef(0x19, "NOT", adds=1, deletes=1, i="Bitwise NOT operation"),
+        OpDef(0x1a, "BYTE", adds=1, deletes=2,
+              i="Retrieve single byte from word"),
+
+        OpDef(0x20, "SHA3", adds=1, deletes=2, i="Compute Keccak-256 hash"),
+
+        OpDef(0x35, "CALLDATALOAD", adds=1, deletes=1,
+              i="Get input data of current environment"),
         OpDef(0x39, "CODECOPY", deletes=3,
               i="Copy code running in current environment to memory"),
         OpDef(0x52, "MSTORE", deletes=2, i="Save word to memory"),
@@ -57,13 +89,22 @@ class Decompiler:
         OpDef(0x5b, "JUMPDEST", i="Mark a valid destination for jumps"),
         OpDef(0x60, "PUSH1", adds=1, codeargs=1,
               i="Place 1 byte item on stack"),
+    ] + [
+        OpDef(0x60 + i, "PUSH{0}".format(i + 1), adds=1, codeargs=i + 1,
+              i="Place {0} byte item on stack".format(i))
+        for i in range(32)
+    ] + [
         OpDef(0x80, "DUP1", deletes=1, adds=2,
               i="Duplicate 1st stack item"),
         OpDef(0x81, "DUP2", deletes=1, adds=2,
-              i="Duplicate 2nd stack item"),
+              i="Duplicate 2nd stack item")
+    ] + [
+        OpDef(0x90 + i, "SWAP{0}".format(i + 1), adds=1,
+              i="Exchange 1st and {0}th/nd stack items".format(i + 2))
+        for i in range(16)
+    ] + [
         OpDef(0xf3, "RETURN", deletes=2,
               i="Halt execution returning output data")
-
 
     ]
 
@@ -80,10 +121,10 @@ class Decompiler:
             except IndexError:
                 break
 
-            try:
-                res = self.map[code](pointer, program)
-            except KeyError:
-                res = OpDef(code, "UNKNOWN")
+            opcode = self.map.get(code)
+            if not opcode:
+                opcode = OpDef(code, "UNKNOWN {0:x}".format(code))
+            res = opcode(pointer, program)
             decompiled.append(res)
             pointer += (1 + res.definition.codeargs)
 
