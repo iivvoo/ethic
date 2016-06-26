@@ -98,12 +98,12 @@ class Decompiler:
     ] + [
         # 0x60 .. 0x7f complete
         OpDef(0x60 + i, "PUSH{0}".format(i + 1), adds=1, codeargs=i + 1,
-              i="Place {0} byte item on stack".format(i))
+              i="Place {0} byte item on stack".format(i + 1))
         for i in range(32)
     ] + [
         # 0x8 complete
         OpDef(0x80 + i, "DUP{0}".format(i + 1), deletes=1 + i, adds=2 + i,
-              i="Duplicate {0}st/nd/th stack item".format(i))
+              i="Duplicate {0}st/nd/th stack item".format(i + 1))
         for i in range(16)
     ] + [
         # 0x9 complete
@@ -112,7 +112,7 @@ class Decompiler:
         for i in range(16)
     ] + [
         # 0xa complete
-        OpDef(0xa0, "LOG{0}".format(i), deletes=i+2,
+        OpDef(0xa0, "LOG{0}".format(i), deletes=i + 2,
               i="Append log with {0} topics".format(i))
         for i in range(4)
     ] + [
