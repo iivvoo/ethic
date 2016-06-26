@@ -10,7 +10,7 @@ data = minimal1
 binary = binascii.unhexlify(data)
 
 
-class OpcodeDef:
+class OpDef:
 
     def __init__(self, value, mnemonic, adds=0, deletes=0, codeargs=0,
                  i=""):
@@ -57,20 +57,20 @@ class Opcode:
 
 class VM:
     opcodes = [
-        OpcodeDef(0x00, "STOP", i="Halts execution"),
-        OpcodeDef(0x39, "CODECOPY", deletes=3,
-                  i="Copy code running in current environment to memory"),
-        OpcodeDef(0x52, "MSTORE", deletes=2, i="Save word to memory"),
-        OpcodeDef(0x56, "JUMP", deletes=1, i="Alters program counter"),
-        OpcodeDef(0x5b, "JUMPDEST", i="Mark a valid destination for jumps"),
-        OpcodeDef(0x60, "PUSH1", adds=1, codeargs=1,
-                  i="Place 1 byte item on stack"),
-        OpcodeDef(0x80, "DUP1", deletes=1, adds=2,
-                  i="Duplicate 1st stack item"),
-        OpcodeDef(0x81, "DUP2", deletes=1, adds=2,
-                  i="Duplicate 2nd stack item"),
-        OpcodeDef(0xf3, "RETURN", deletes=2,
-                  i="Halt execution returning output data")
+        OpDef(0x00, "STOP", i="Halts execution"),
+        OpDef(0x39, "CODECOPY", deletes=3,
+              i="Copy code running in current environment to memory"),
+        OpDef(0x52, "MSTORE", deletes=2, i="Save word to memory"),
+        OpDef(0x56, "JUMP", deletes=1, i="Alters program counter"),
+        OpDef(0x5b, "JUMPDEST", i="Mark a valid destination for jumps"),
+        OpDef(0x60, "PUSH1", adds=1, codeargs=1,
+              i="Place 1 byte item on stack"),
+        OpDef(0x80, "DUP1", deletes=1, adds=2,
+              i="Duplicate 1st stack item"),
+        OpDef(0x81, "DUP2", deletes=1, adds=2,
+              i="Duplicate 2nd stack item"),
+        OpDef(0xf3, "RETURN", deletes=2,
+              i="Halt execution returning output data")
 
 
     ]
@@ -91,7 +91,7 @@ class VM:
             try:
                 res = self.map[code](pointer, program)
             except KeyError:
-                res = OpcodeDef(code, "UNKNOWN")
+                res = OpDef(code, "UNKNOWN")
             decompiled.append(res)
             pointer += (1 + res.definition.codeargs)
 
