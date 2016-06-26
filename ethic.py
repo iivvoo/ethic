@@ -9,8 +9,8 @@ class OpDef:
         """ defines an opcode.
             value - the opcode value, e.g. 0x00
             mnemonic - opcode mnemonic, e.g. STOP
-            adds - number of bytes added to stack
-            deletes - number of bytes removed from stack
+            adds - number of items added to stack
+            deletes - number of items removed from stack
             codeargs - number of subsequence bytes read from code
             i - additional info
         """
