@@ -182,7 +182,7 @@ class Decompiler:
                 labels[correction] = "label{0}".format(correction)
                 fase2.append("== {0} ==".format(labels[correction]))  # Hacky
 
-        # second sweep: adjust jump's
+        # second sweep: adjust jumps
         fase3 = []
         prevcode = None
         print(labels)
