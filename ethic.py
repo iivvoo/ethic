@@ -57,9 +57,12 @@ class Decompiler:
         OpDef(0x05, "SDIV", adds=1, deletes=2,
               i="Signed integer division operation (truncated)"),
         OpDef(0x06, "MOD", adds=1, deletes=2, i="Modulo remainder operation"),
-        OpDef(0x07, "SMOD", adds=1, deletes=2, i="Signed modulo remainder operation"),
-        OpDef(0x08, "ADDMOD", adds=1, deletes=3, i="Modulo addition operation"),
-        OpDef(0x09, "MULMOD", adds=1, deletes=3, i="Modulo multiplication oepration"),
+        OpDef(0x07, "SMOD", adds=1, deletes=2,
+              i="Signed modulo remainder operation"),
+        OpDef(0x08, "ADDMOD", adds=1, deletes=3,
+              i="Modulo addition operation"),
+        OpDef(0x09, "MULMOD", adds=1, deletes=3,
+              i="Modulo multiplication oepration"),
         OpDef(0x0a, "EXP", adds=1, deletes=2, i="Exponential operation"),
         OpDef(0x0b, "SIGNEXTEND", adds=1, deletes=2,
               i="Extended length of two's complement signed integer"),
@@ -84,8 +87,13 @@ class Decompiler:
               i="Get input data of current environment"),
         OpDef(0x39, "CODECOPY", deletes=3,
               i="Copy code running in current environment to memory"),
+
+        OpDef(0x50, "POP", deletes=1, i="Remove item from stack"),
+        OpDef(0x51, "MLOAD", adds=1, deletes=1, i="Load word from memory"),
         OpDef(0x52, "MSTORE", deletes=2, i="Save word to memory"),
-        OpDef(0x56, "JUMP", deletes=1, i="Alters program counter"),
+        OpDef(0x56, "JUMP", deletes=1, i="Alter the program counter"),
+        OpDef(0x56, "JUMPI", deletes=2,
+              i="Conditionally alter the program counter"),
         OpDef(0x5b, "JUMPDEST", i="Mark a valid destination for jumps"),
         OpDef(0x60, "PUSH1", adds=1, codeargs=1,
               i="Place 1 byte item on stack"),
@@ -94,10 +102,9 @@ class Decompiler:
               i="Place {0} byte item on stack".format(i))
         for i in range(32)
     ] + [
-        OpDef(0x80, "DUP1", deletes=1, adds=2,
-              i="Duplicate 1st stack item"),
-        OpDef(0x81, "DUP2", deletes=1, adds=2,
-              i="Duplicate 2nd stack item")
+        OpDef(0x80 + i, "DUP{0}".format(i), deletes=1 + i, adds=2 + i,
+              i="Duplicate {0}st/nd/th stack item".format(i))
+        for i in range(16)
     ] + [
         OpDef(0x90 + i, "SWAP{0}".format(i + 1), adds=1,
               i="Exchange 1st and {0}th/nd stack items".format(i + 2))
