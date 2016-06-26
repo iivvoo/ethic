@@ -51,6 +51,7 @@ class Opcode:
 
 class Decompiler:
     opcodes = [
+        # 0x0 complete
         OpDef(0x00, "STOP", i="Halts execution"),
         OpDef(0x01, "ADD", adds=1, deletes=2, i="Addition operation"),
         OpDef(0x02, "MUL", adds=1, deletes=2, i="Multiplication operation"),
@@ -69,6 +70,7 @@ class Decompiler:
         OpDef(0x0b, "SIGNEXTEND", adds=1, deletes=2,
               i="Extended length of two's complement signed integer"),
 
+        # 0x1 complete
         OpDef(0x10, "LT", adds=1, deletes=2, i="Less-than comparison"),
         OpDef(0x11, "GT", adds=1, deletes=2, i="Greater-than comparison"),
         OpDef(0x12, "SLT", adds=1, deletes=2, i="Signed less-than comparison"),
@@ -83,6 +85,7 @@ class Decompiler:
         OpDef(0x1a, "BYTE", adds=1, deletes=2,
               i="Retrieve single byte from word"),
 
+        # 0x2 complete
         OpDef(0x20, "SHA3", adds=1, deletes=2, i="Compute Keccak-256 hash"),
 
         OpDef(0x35, "CALLDATALOAD", adds=1, deletes=1,
@@ -143,6 +146,7 @@ class Decompiler:
         pointer = 0
         decompiled = []
 
+        # Fase 1: binary to opcode
         while True:
             try:
                 code = program[pointer]
@@ -156,7 +160,50 @@ class Decompiler:
             decompiled.append(res)
             pointer += (1 + res.definition.codeargs)
 
+        # fase 2: compensate for "loader", manage labels/jumps
+        # this is variable. Probably prepares stack with calling info
+        offset = 18  # pointer after 'return' after CODECOPY
+
+        # first sweep: collect labels (JUMPDEST)
+        labels = {}
+
+        fase2 = []
         for opcode in decompiled:
+            fase2.append(opcode)
+            if opcode.definition.mnemonic == "JUMPDEST":
+                correction = opcode.pointer - offset
+                labels[correction] = "label{0}".format(correction)
+                fase2.append("== {0} ==".format(labels[correction]))  # Hacky
+
+        for opcode in fase2:
+            print(opcode)
+
+        return
+
+        ## Below doesn't work.
+        # second sweep: adjust jump's
+        fase3 = []
+        prevcode = None
+        print(labels)
+        for opcode in fase2:
+            fase3.append(opcode)
+            print(opcode)
+            # yuck! Mix of opcode and string
+            if hasattr(opcode, 'definition') and \
+                (opcode.definition.mnemonic == "JUMPI" or \
+                opcode.definition.mnemonic == "JUMP"):
+                # need prev!
+                # probably not correct/best way to transform
+                # import pdb; pdb.set_trace()
+                print(prevcode.args)
+                destination = (prevcode.args[0] << 8) + prevcode.args[1]
+                print(destination)
+                fase3.append(" ==> Jump to label {0}".format(labels[destination]))
+
+            prevcode = opcode
+
+        # print result
+        for opcode in fase3:
             print(opcode)
 
 if __name__ == '__main__':
