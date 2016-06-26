@@ -92,27 +92,46 @@ class Decompiler:
         OpDef(0x51, "MLOAD", adds=1, deletes=1, i="Load word from memory"),
         OpDef(0x52, "MSTORE", deletes=2, i="Save word to memory"),
         OpDef(0x56, "JUMP", deletes=1, i="Alter the program counter"),
-        OpDef(0x56, "JUMPI", deletes=2,
+        OpDef(0x57, "JUMPI", deletes=2,
               i="Conditionally alter the program counter"),
         OpDef(0x5b, "JUMPDEST", i="Mark a valid destination for jumps"),
-        OpDef(0x60, "PUSH1", adds=1, codeargs=1,
-              i="Place 1 byte item on stack"),
     ] + [
+        # 0x60 .. 0x7f complete
         OpDef(0x60 + i, "PUSH{0}".format(i + 1), adds=1, codeargs=i + 1,
               i="Place {0} byte item on stack".format(i))
         for i in range(32)
     ] + [
-        OpDef(0x80 + i, "DUP{0}".format(i), deletes=1 + i, adds=2 + i,
+        # 0x8 complete
+        OpDef(0x80 + i, "DUP{0}".format(i + 1), deletes=1 + i, adds=2 + i,
               i="Duplicate {0}st/nd/th stack item".format(i))
         for i in range(16)
     ] + [
+        # 0x9 complete
         OpDef(0x90 + i, "SWAP{0}".format(i + 1), adds=1,
               i="Exchange 1st and {0}th/nd stack items".format(i + 2))
         for i in range(16)
     ] + [
+        # 0xa complete
+        OpDef(0xa0, "LOG{0}".format(i), deletes=i+2,
+              i="Append log with {0} topics".format(i))
+        for i in range(4)
+    ] + [
+        # 0xf complete
+        OpDef(0xf0, "CREATE", adds=1, deletes=3,
+              i="Create a new account with associated code"),
+        OpDef(0xf1, "CALL", adds=1, deletes=7,
+              i="Message-call into account"),
+        OpDef(0xf2, "CALLCODE", adds=1, deletes=7,
+              i="Message-call into this account with "
+                "alternative account's code"),
         OpDef(0xf3, "RETURN", deletes=2,
-              i="Halt execution returning output data")
-
+              i="Halt execution returning output data"),
+        OpDef(0xf4, "DELEGATECALL", adds=1, deletes=7,
+              i="Message-call into this account with "
+                "alternative account's code but persisting "
+                "the current values for sender and value"),
+        OpDef(0xff, "SUICIDE", deletes=1,
+              i="Halt execution and register account for later deletion")
     ]
 
     def __init__(self):
