@@ -1,7 +1,7 @@
-# Ethereum Inverse Compiler (ethic)
+# ETHereum Inverse Compiler (ethic)
 
-Ethic is a feeble attempt at building that (somewhat) decompiles ethereum
-code.
+Ethic is a feeble attempt at building that (somewhat) decompiles Ethereum
+EVM code.
 
 Don't expect too much at this point, it currently even fails at properly
 decoding all opcodes and it may never produce more than hints and pseudo
